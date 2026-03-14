@@ -1,16 +1,22 @@
 from fastapi import FastAPI
 import threading
-
-from app.api.notification_api import router
 from app.consumers.rabbitmq_consumer import start_consumer
 
 app = FastAPI()
 
-app.include_router(router)
+@app.get("/health")
+def health():
+    return {"status": "running"}
 
-def start_rabbit():
+def run_consumer():
+    print("Starting RabbitMQ consumer...")
+    try:
+        start_consumer()
+    except Exception as e:
+        print("Consumer crashed:", e)
 
-    start_consumer()
-
-thread = threading.Thread(target=start_rabbit)
-thread.start()
+@app.on_event("startup")
+def startup_event():
+    thread = threading.Thread(target=run_consumer)
+    thread.daemon = True
+    thread.start()
