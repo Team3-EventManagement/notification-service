@@ -16,7 +16,7 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-channel.queue_declare(queue="notification_queue", durable=True)
+channel.queue_declare(queue="notifications", durable=True)
 
 events = [
 
@@ -68,7 +68,7 @@ for event in events:
 
     channel.basic_publish(
         exchange="",
-        routing_key="notification_queue",
+        routing_key="notifications",
         body=json.dumps(event)
     )
 

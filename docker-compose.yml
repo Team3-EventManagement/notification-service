@@ -1,7 +1,6 @@
 version: "3"
 
 services:
-
   notification-service:
     build: .
     ports:
@@ -9,12 +8,18 @@ services:
     depends_on:
       - rabbitmq
       - db
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_QUEUE: notifications
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
+
   db:
     image: postgres
     environment:
