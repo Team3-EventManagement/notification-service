@@ -1,8 +1,13 @@
 import smtplib
 from email.mime.text import MIMEText
-from app.config import EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD
+
+from app.config import EMAIL_HOST, EMAIL_PASSWORD, EMAIL_PORT, EMAIL_USER
+
 
 def send_email(to_email, subject, message):
+    if not EMAIL_USER or not EMAIL_PASSWORD:
+        print("Email sending skipped: EMAIL_USER/EMAIL_PASSWORD are not configured")
+        return
 
     print("Sending email to:", to_email)
 
@@ -12,7 +17,6 @@ def send_email(to_email, subject, message):
     msg["To"] = to_email
 
     try:
-
         server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
         server.starttls()
 

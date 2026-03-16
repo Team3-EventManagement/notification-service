@@ -1,22 +1,27 @@
+import asyncio
+from contextlib import asynccontextmanager
+from threading import Event
+
 from fastapi import FastAPI
-import threading
+
 from app.consumers.rabbitmq_consumer import start_consumer
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    stop_event = Event()
+    consumer_task = asyncio.create_task(asyncio.to_thread(start_consumer, stop_event))
+
+    try:
+        yield
+    finally:
+        stop_event.set()
+        await consumer_task
+
+
+app = FastAPI(lifespan=lifespan)
+
 
 @app.get("/health")
 def health():
     return {"status": "running"}
-
-def run_consumer():
-    print("Starting RabbitMQ consumer...")
-    try:
-        start_consumer()
-    except Exception as e:
-        print("Consumer crashed:", e)
-
-@app.on_event("startup")
-def startup_event():
-    thread = threading.Thread(target=run_consumer)
-    thread.daemon = True
-    thread.start()
